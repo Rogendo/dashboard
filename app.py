@@ -2,26 +2,17 @@ import pandas as pd
 from PIL import Image
 import matplotlib.pyplot as plt
 import seaborn as sns
+from ydata_profiling import ProfileReport
+import time
+import os
+from sklearn.metrics import classification_report,mean_squared_error
+import xgboost as xgb
+import sklearn.metrics as metrics
+import streamlit as st
+from streamlit_elements import elements, mui, html
 from streamlit_option_menu import option_menu
 from streamlit_extras.colored_header import colored_header
 from streamlit_extras.card import card
-import pandas as pd
-from ydata_profiling import ProfileReport
-import time
-#from streamlit_elements import elements, mui, html
-import os
-# Importing libraries
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
-from sklearn.metrics import classification_report
-import xgboost as xgb
-from sklearn.metrics import mean_squared_error
-import sklearn.metrics as metrics
-import streamlit as st
-from streamlit_card import card
-from streamlit_elements import elements, mui, html
 
 # Set page config
 st.set_page_config(
