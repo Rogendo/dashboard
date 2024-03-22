@@ -1,4 +1,3 @@
-import streamlit as st
 import pandas as pd
 from PIL import Image
 import matplotlib.pyplot as plt
@@ -20,6 +19,9 @@ from sklearn.metrics import classification_report
 import xgboost as xgb
 from sklearn.metrics import mean_squared_error
 import sklearn.metrics as metrics
+import streamlit as st
+from streamlit_card import card
+from streamlit_elements import elements, mui, html
 
 # Set page config
 st.set_page_config(
@@ -92,7 +94,7 @@ def create_card(image_path, title, description):
             }}
         </style>
         <div class="card">
-            <img src="./{image_path}" alt="chart" style="width:100%">
+            <img src="{image_path}" alt="chart" style="width:100%">
             <div class="card-title">{title}</div>
             <div class="card-description">{description}</div>
         </div>
@@ -108,8 +110,8 @@ def main():
         menu = option_menu(
             menu_icon="cast",
             menu_title="Menu",
-            options=["Analysis", "Data", "Predictions", "About", "Contact us"],
-            icons=["house", "database-gear", "graph-up", "info-circle", "envelope"],
+            options=["Data", "Analysis", "About", "Contact us"],
+            icons=["database-gear", "graph-up", "info-circle", "envelope"],
             default_index=0,
         )
     df = load_data()
@@ -131,12 +133,54 @@ def main():
     if menu == "Analysis":
         st.title("Power Consumption EDA Dashboard")
         st.markdown("---")
-        
-        b1, b2, b3, b4 = st.columns(4)
-        b1.image(Image.open('assets/img.jpeg'))
-        b2.image(Image.open('assets/img7.jpeg'))
-        b3.image(Image.open('assets/img5.jpeg'))
-        b4.image(Image.open('assets/img13.jpeg'))
+        col = st.columns(2)
+
+        with col[0]:
+            card(
+                title="",
+                text="Electricity Usage Predictions",
+                image="https://electricityconsumptionanalysisdata.s3.eu-north-1.amazonaws.com/predictedusage.png",
+                url="https://electricityconsumptionanalysisdata.s3.eu-north-1.amazonaws.com/predictedusage.png",
+                key="card"
+            )
+        with col[1]:
+            card(
+                title="",
+                text="Predicted Usage against real data",
+                image="https://electricityconsumptionanalysisdata.s3.eu-north-1.amazonaws.com/actualvspredictedusage.png",
+                url="https://electricityconsumptionanalysisdata.s3.eu-north-1.amazonaws.com/actualvspredictedusage.png",
+                key="card1"
+            )
+
+        with elements("multiple_children"):
+
+            mui.Button(
+                # mui.icon.EmojiPeople,
+                # mui.icon.DoubleArrow,
+                mui.icon.Power,
+
+
+                "Charts and Analysis"
+            )
+
+        st.subheader("Relavant Features")
+
+        with elements("style_mui_sx"):
+            mui.Box(
+                "The two most important factors are the 15-day SMA and the hour of that specific measurement. The temperature, as expected, is the only external factor that is relatively significant to predict energy consumption.",
+                sx={
+                    "bgcolor": "background.paper",
+                    "boxShadow": 1,
+                    "borderRadius": 2,
+                    "p": 2,
+                    "minWidth": 100,
+
+                },
+
+            )
+        create_card("https://electricityconsumptionanalysisdata.s3.eu-north-1.amazonaws.com/important-feature.png", "", "By plotting the importance each feature played in predicting the correct result we can clearly notice some relevant patterns.")
+
+
 
         col = st.columns(2)
 
@@ -158,7 +202,7 @@ def main():
             plt.ylabel("Frequency")
             st.pyplot(fig4)
         
-        if st.sidebar.checkbox("All zones"):
+        if st.sidebar.checkbox("All Charts"):
             fig, ax = plt.subplots(figsize=(30, 20))
             st.subheader("Power Consumption in KW against time in  the 3 Zones")
 
@@ -172,18 +216,6 @@ def main():
             plt.xticks(fontsize=12)
             plt.yticks(fontsize=12)
             st.pyplot(fig)
-        
-                
-                
-            # Plotting based on the filtered data
-        if not filtered_df.empty:
-            # Plot Temperature vs. Power Consumption_Zone1
-            fig, ax = plt.subplots(figsize=(10, 6))
-            sns.scatterplot(data=filtered_df, x='Temperature', y='PowerConsumption_Zone1', ax=ax)
-            plt.title('Temperature vs. Power Consumption (Zone 1)')
-            st.pyplot(fig)        
-            # Close the Matplotlib figure to release memory
-            plt.close(fig)
             
             # Plot Temperature vs. Power Consumption_Zone2
             fig, ax = plt.subplots(figsize=(10, 6))
@@ -202,14 +234,6 @@ def main():
             plt.close(fig)
             
             
-            # Plot Humidity vs. Power Consumption_Zone1
-            fig, ax = plt.subplots(figsize=(10, 6))
-            sns.scatterplot(data=filtered_df, x='Humidity', y='PowerConsumption_Zone1', ax=ax)
-            plt.title('Humidity vs. Power Consumption (Zone 1)')
-            st.pyplot(fig)
-            # Close the Matplotlib figure to release memory
-            plt.close(fig)
-            
             
             # Plot Humidity vs. Power Consumption_Zone2
             fig, ax = plt.subplots(figsize=(10, 6))
@@ -227,83 +251,123 @@ def main():
             st.pyplot(fig)
             # Close the Matplotlib figure to release memory
             plt.close(fig)
+
+            st.line_chart(df)
+
+            # Plotting based on the filtered data
+        if not filtered_df.empty:
+            # Plot Temperature vs. Power Consumption_Zone1
+            fig, ax = plt.subplots(figsize=(10, 6))
+            sns.scatterplot(data=filtered_df, x='Temperature', y='PowerConsumption_Zone1', ax=ax)
+            plt.title('Temperature vs. Power Consumption (Zone 1)')
+            st.pyplot(fig)        
+            # Close the Matplotlib figure to release memory
+            plt.close(fig)
+            
+            
+            
+            # Plot Humidity vs. Power Consumption_Zone1
+            fig, ax = plt.subplots(figsize=(10, 6))
+            sns.scatterplot(data=filtered_df, x='Humidity', y='PowerConsumption_Zone1', ax=ax)
+            plt.title('Humidity vs. Power Consumption (Zone 1)')
+            st.pyplot(fig)
+            # Close the Matplotlib figure to release memory
+            plt.close(fig)
+            
         else:
             st.write("No data available for the selected month.")
 
+
         with col[0]:
-            st.markdown('#### Temperature by Hour')
+            with elements("style_mui_sx1"):
+                mui.Box(
+                    "Simple moving average (SMA) is a fundamental piece of information to smoothen predictions. It calculates the mean of all the data points in a time series in order to extract valuable information for the prediction algorithm.",
+                    sx={
+                        "bgcolor": "background.paper",
+                        "boxShadow": 1,
+                        "borderRadius": 2,
+                        "p": 2,
+                        "minWidth": 300,
+                        "width": 100,
 
+                    }
 
-            fig2, ax = plt.subplots(figsize=(20, 10))
+                )
+            with col[1]:
+                with elements("style_mui_sx2"):
+                    mui.Box(
+                        "",
+                        sx={
+                            "bgcolor": "background.paper",
+                            "boxShadow": 1,
+                            "borderRadius": 2,
+                            "p": 2,
+                            "minWidth": 300,
+                            "width": 100
 
-            sns.boxplot(data=df, x='hour', y='Temperature', palette = 'Blues', showfliers=False)
+                        }
+                    )
 
-            plt.suptitle('Temperature by Hour', fontsize=15)
-            plt.xlabel('hour', fontsize=12)
-            plt.ylabel('Temperature in °C', fontsize=12)
-            plt.xticks(fontsize=12)
-            plt.yticks(fontsize=12)
-
-            #Generating plot
-            st.pyplot(fig2)
-            # Close the Matplotlib figure to release memory
-            plt.close(fig2)
-            st.image(Image.open("important-feature.png"))
-            
-
+        with col[0]:
+            create_card("https://electricityconsumptionanalysisdata.s3.eu-north-1.amazonaws.com/train-test-split.png", "Train Test Split","""The dataset is split into train and test sets.<b>NB: </b>70% of the data available is from January 1st until October 10th so that’s going to be our training set whereas from October 2nd until December 30th (the last data point available) will be our testing set. Zone 1 Power Consumption was selected as the target variable because proceeding area by area makes more sense.""")
         with col[1]:
-            # st.subheader("Histogram of Power Consumption")
-            # plt.hist(df["PowerConsumption_Zone3"], bins=20)
-            # plt.xlabel("Power Consumption (Zone 3)")
-            # plt.ylabel("Frequency")
-            # st.pyplot(fig)
+            create_card("https://electricityconsumptionanalysisdata.s3.eu-north-1.amazonaws.com/predictionsvsdata.png", "Predictions", "Gradient Boosting algorithm was used to train the model. Overally, predictions follow the typical downtrend of the cold season even though the model has some trouble identifying the peaks in November and December.")
 
-            st.markdown('#### Humidity by Hour')
+        create_card("https://electricityconsumptionanalysisdata.s3.eu-north-1.amazonaws.com/octoberdatavspredictiondata.png", "October Data and Predictions","If we zoom into the first 15 days of October we can clearly see how close the predictions are to the test data for that month.")
+        create_card("https://electricityconsumptionanalysisdata.s3.eu-north-1.amazonaws.com/decemberdatavsprediction.png", "December Data and Predictions","In December, peak predictions are far away from the actual records. This can be improved in future models by either tuning hyperparameters or improving feature engineering")
 
-            fig3, ax = plt.subplots(figsize=(20, 10))
+        st.subheader("XGBoost Accuracy Metrics")
 
-            sns.boxplot(data=df, x='hour', y='Humidity', palette = 'Greens', showfliers=False)
+        metrics = st.columns(2)
+        with metrics[0]:
+            with elements("style_mui_sx3"):
+                mui.Box(
+                    """
+                    MAE =========> 1354.63 KWs,
+                    r2 =============> 0.9101,
+                    MSE ======> 3746515.4004,
+                    RMSE=========> 1935.5917,
+""",
+                    sx={
+                        "bgcolor": "background.paper",
+                        "boxShadow": 1,
+                        "borderRadius": 2,
+                        "p": 2,
+                        "minWidth": 300,
+                        "width": 150
 
-            plt.suptitle('Humidity by Hour', fontsize=15)
-            plt.xlabel('hour', fontsize=12)
-            plt.ylabel('Humidity in %', fontsize=12)
-            plt.xticks(fontsize=12)
-            plt.yticks(fontsize=12)
+                    }
+                )
+        with metrics[1]:
 
-            #Generating plot
-            st.pyplot(fig3)
-            # Close the Matplotlib figure to release memory
-            plt.close(fig3)
-            #Printing predictions on chart to visually assess accuracy
-                
-            image_path = os.path.abspath("https://www.mongodb.com/docs/charts/chart-types/")
-            create_card(image_path, "Chart 1 Title", "Description of chart 1.")
-            
-            # create_card("important-feature.png", "Chart 3 Title", "Description of chart 3.")
+            with elements("style_mui_sx5"):
+                acclst="""
+                    <ul>
+                        <li>Mean Absolute Error       - MAE</li>
+                        <li>Mean Squared Error        - MSE</li>
+                        <li>Percentage of variability - r2</li>                    
+                        <li>Root Mean Squared Error   - RMSE</li>
+                    </ul>
+                    
+                    """
+                st.markdown(acclst,unsafe_allow_html=True)
 
-        # st.subheader("Correlation Heatmap")
-        fig, ax = plt.subplots(figsize=(12, 10))
-        sns.heatmap(df.corr(), annot=True, ax=ax, cmap='vlag', fmt='.1g', annot_kws={'fontsize': 14, 'fontweight': 'regular'}, xticklabels=['Temp', 'Hum', 'Wind', 'Gen Diff Flows', 'Diff Flows', 'Power Z1', 'Power Z2', 'Power Z3'], yticklabels=['Temp', 'Hum', 'Wind', 'Gen Diff Flows', 'Diff Flows', 'Power Z1', 'Power Z2', 'Power Z3'])
-        plt.xticks(fontsize=11)
-        plt.yticks(fontsize=11)
-        st.pyplot(fig)
-        plt.close(fig)
+        create_card("https://electricityconsumptionanalysisdata.s3.eu-north-1.amazonaws.com/predictedusage.png", "2017 Predicted Usage","")
+        create_card("https://electricityconsumptionanalysisdata.s3.eu-north-1.amazonaws.com/actualvspredictedusagedec.png", "2017 Predicted Usage Against Real Consumption","")
 
-        
-            # Display multiple cards
-        create_card("/home/rogendo/Desktop/dashboard/octoberdatavspredictiondata.png", "Chart 1 Title", "Description of chart 1.")
-        create_card("/home/rogendo/Desktop/dashboard/octoberdatavspredictiondata.png", "Chart 2 Title", "Description of chart 2.")
-        create_card("/home/rogendo/Desktop/dashboard/octoberdatavspredictiondata.png", "Chart 3 Title", "Description of chart 3.")
-   
         # download notebook for further analysis
         st.subheader("For Further Analysis, Download the Notebook bellow... happy debugging!!")
+        def baloons():
+            st.balloons()
         with open("profilereport.html", "rb") as file:
             st.download_button(label="Notebook",
                     data=file,
                     file_name="time-series-forecasting-on-power-consumption.ipynb",
-                    mime="Electricity_Forecasting_Notebook/notebook"
+                    mime="Electricity_Forecasting_Notebook/notebook",on_click=baloons()
                 )
     if menu == "Data":
+        create_card("https://electricityconsumptionanalysisdata.s3.eu-north-1.amazonaws.com/electricbackground1.jpg", "Electricity Consumption Dataset", "The data, which you can find at  <a href='https://www.kaggle.com/datasets/fedesoriano/electric-power-consumption'>this link</a>, has 52,416 energy consumption observations in 10-minute windows starting from January 1st, 2017, all the way through December 30th (not 31st) of the same year. Some of the features are:</p>    <ul>    <li>Date Time: Time window of ten minutes.</li>    <li>Temperature: Weather Temperature in °C</li>    <li>Humidity: Weather Humidity in %</li>    <li>Wind Speed: Wind Speed in km/h</li>    <li>Zone 1 Power Consumption in KiloWatts (KW)</li>    <li>Zone 2 Power Consumption in KW</li>    <li>Zone 3 Power Consumption in KW</li>    </ul>")
+
         df = load_data()
         profile = ProfileReport(df, title="Electricity consumption Profile Report")
 
